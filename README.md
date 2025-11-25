@@ -5,10 +5,11 @@ Forma parte del ecosistema Abyssium compuesto por: `auth-service`, `company-serv
 
 Este servicio **NO administra usuarios ni empresas**, pero **toma el `empresas_id_empresa` del usuario autenticado** usando la cookie del `auth-service`.
 
+---
 
-# 📂 Estructura del Proyecto
+## 📂 Estructura del Proyecto
 
-
+```
 sale-service/
 │
 ├── app/
@@ -33,36 +34,37 @@ sale-service/
 │       └── ventas.py
 │
 ├── requirements.txt
-└── README.md  (este documento)
+└── README.md
+```
 
 ---
 
-# 🧩 Dependencias Importantes
+## 🧩 Dependencias Importantes
 
 - **FastAPI**
 - **SQLAlchemy Async**
 - **Pydantic**
 - **PostgreSQL**
-- **Supabase (solo para auth-service)**
+- **Supabase** (solo para auth-service)
 - **JWT + Cookie session** (auth-service)
 
 ---
 
-# 🔐 Autenticación & Autorización
+## 🔐 Autenticación & Autorización
 
 El acceso se controla mediante:
 
-```
+```python
 current_user: CurrentUser = Depends(require_permission("acción", "recurso"))
 ```
 
-Las acciones válidas son:
+### Acciones válidas
 
 ```
 create, read, update, delete
 ```
 
-Recursos usados por este servicio:
+### Recursos usados por este servicio
 
 ```
 clientes
@@ -70,11 +72,11 @@ ventas
 ventas_detalles
 ```
 
-El `auth-service` valida tokens, roles y permisos.
+> El `auth-service` valida tokens, roles y permisos.
 
 ---
 
-# 🧠 Conceptos Clave del Servicio
+## 🧠 Conceptos Clave del Servicio
 
 ### ✔ Un cliente **siempre pertenece a la empresa del usuario**
 
@@ -84,9 +86,9 @@ No se envía `empresas_id_empresa` en el body.
 
 También guarda automáticamente:
 
-* usuario que realizó la venta
-* fecha
-* total
+- Usuario que realizó la venta
+- Fecha
+- Total
 
 ### ✔ El detalle de venta **no toca inventarios aquí**
 
@@ -94,57 +96,57 @@ El inventario se modifica en el `inventory-service`.
 
 ---
 
-# 🗄 Modelos del Microservicio
+## 🗄 Modelos del Microservicio
 
-## Cliente
+### Cliente
 
-```
-id_cliente (PK)
-nombre
-tipo
-telefono
-email
-notas
-empresas_id_empresa
-```
+| Campo | Tipo | Descripción |
+|-------|------|-------------|
+| `id_cliente` | PK | Identificador único |
+| `nombre` | String | Nombre del cliente |
+| `tipo` | String | Tipo de cliente |
+| `telefono` | String | Teléfono de contacto |
+| `email` | String | Correo electrónico |
+| `notas` | String | Notas adicionales |
+| `empresas_id_empresa` | FK | ID de la empresa |
 
-## Venta
+### Venta
 
-```
-id_venta (PK)
-descuento
-razon_social
-nit
-clientes_id_cliente
-moneda_id_moneda
-usuarios_id_usuario
-total
-fecha_creacion
-empresas_id_empresa
-```
+| Campo | Tipo | Descripción |
+|-------|------|-------------|
+| `id_venta` | PK | Identificador único |
+| `descuento` | Decimal | Descuento aplicado |
+| `razon_social` | String | Razón social |
+| `nit` | String | NIT |
+| `clientes_id_cliente` | FK | ID del cliente |
+| `moneda_id_moneda` | FK | ID de la moneda |
+| `usuarios_id_usuario` | FK | ID del usuario |
+| `total` | Decimal | Total de la venta |
+| `fecha_creacion` | DateTime | Fecha de creación |
+| `empresas_id_empresa` | FK | ID de la empresa |
 
-## Venta Detalle
+### Venta Detalle
 
-```
-id_venta_detalle (PK)
-venta_id_venta (FK → venta)
-productos_id_producto
-cantidad
-precio_unitario
-descuento_item
-```
+| Campo | Tipo | Descripción |
+|-------|------|-------------|
+| `id_venta_detalle` | PK | Identificador único |
+| `venta_id_venta` | FK | ID de la venta |
+| `productos_id_producto` | FK | ID del producto |
+| `cantidad` | Integer | Cantidad |
+| `precio_unitario` | Decimal | Precio unitario |
+| `descuento_item` | Decimal | Descuento por ítem |
 
 ---
 
-# 🛠 Endpoints
+## 🛠 Endpoints
 
-## 📌 Clientes
+### 📌 Clientes
 
-### **POST /clientes**
+#### `POST /clientes`
 
 Crear cliente
 
-Body:
+**Body:**
 
 ```json
 {
@@ -156,31 +158,31 @@ Body:
 }
 ```
 
-### **GET /clientes**
+#### `GET /clientes`
 
 Lista clientes de la empresa
 
-### **GET /clientes/{id}**
+#### `GET /clientes/{id}`
 
-Obtiene un cliente
+Obtiene un cliente por ID
 
-### **PATCH /clientes/{id}**
+#### `PATCH /clientes/{id}`
 
-Actualiza cliente
+Actualiza un cliente
 
-### **DELETE /clientes/{id}**
+#### `DELETE /clientes/{id}`
 
-Soft delete
+Soft delete de un cliente
 
 ---
 
-## 📌 Ventas
+### 📌 Ventas
 
-### **POST /ventas**
+#### `POST /ventas`
 
 Crea una venta y devuelve la venta con ID
 
-Body:
+**Body:**
 
 ```json
 {
@@ -193,27 +195,27 @@ Body:
 }
 ```
 
-### **GET /ventas**
+#### `GET /ventas`
 
 Lista ventas de la empresa
 
-### **GET /ventas/{id}**
+#### `GET /ventas/{id}`
 
-Obtiene venta
+Obtiene una venta por ID
 
-### **DELETE /ventas/{id}**
+#### `DELETE /ventas/{id}`
 
-Elimina venta (soft delete si deseas modificar)
+Elimina una venta (soft delete si deseas modificar)
 
 ---
 
-## 📌 Venta Detalle
+### 📌 Venta Detalle
 
-### **POST /ventas/{venta_id}/detalle**
+#### `POST /ventas/{venta_id}/detalle`
 
 Crea un ítem de detalle
 
-Body:
+**Body:**
 
 ```json
 {
@@ -224,51 +226,61 @@ Body:
 }
 ```
 
-### **GET /ventas/{venta_id}/detalle**
+#### `GET /ventas/{venta_id}/detalle`
 
 Lista los detalles de una venta
 
-### **DELETE /ventas/{venta_id}/detalle/{detalle_id}**
+#### `DELETE /ventas/{venta_id}/detalle/{detalle_id}`
 
 Elimina un detalle
 
 ---
 
-# 🔄 Flujo típico
+## 🔄 Flujo típico
 
-1. Usuario inicia sesión → cookie con JWT → `auth-service`.
+1. Usuario inicia sesión → cookie con JWT → `auth-service`
 2. `sale-service` recibe cookie y `deps.py` obtiene:
-
-   * id_usuario
-   * id_empresa
-   * roles
-   * permisos
-3. Usuario crea cliente.
-4. Usuario crea venta.
-5. Usuario crea detalles de venta.
-6. (Opcional) Un servicio externo descuenta inventario.
-7. Reportes se generan externamente (Power BI o microservicio de reportes).
+   - `id_usuario`
+   - `id_empresa`
+   - `roles`
+   - `permisos`
+3. Usuario crea cliente
+4. Usuario crea venta
+5. Usuario crea detalles de venta
+6. (Opcional) Un servicio externo descuenta inventario
+7. Reportes se generan externamente (Power BI o microservicio de reportes)
 
 ---
 
-# 📦 Instalación y Ejecución
+## 📦 Instalación y Ejecución
 
 ### 1. Crear entorno virtual
 
-```
+**Linux/Mac:**
+
+```bash
 python -m venv .venv
-source .venv/bin/activate   # Windows: .venv\Scripts\activate
+source .venv/bin/activate
+```
+
+**Windows:**
+
+```powershell
+python -m venv .venv
+.venv\Scripts\activate
 ```
 
 ### 2. Instalar dependencias
 
-```
+```bash
 pip install -r requirements.txt
 ```
 
 ### 3. Definir archivo `.env`
 
-```
+Crea un archivo `.env` en la raíz del proyecto con las siguientes variables:
+
+```env
 DATABASE_URL=postgresql+asyncpg://user:pass@host/db
 SUPABASE_URL=...
 SUPABASE_SERVICE_ROLE_KEY=...
@@ -278,25 +290,31 @@ COOKIE_NAME=session
 
 ### 4. Ejecutar servidor
 
-```
+```bash
 uvicorn app.main:app --reload
 ```
 
 ---
 
-# 🔍 Notas Técnicas Importantes
+## 🔍 Notas Técnicas Importantes
 
-* **NO declares ForeignKey hacia empresas, productos, moneda, clientes, usuarios**, salvo ventas → venta_detalle.
+- **NO declares ForeignKey hacia empresas, productos, moneda, clientes, usuarios**, salvo ventas → venta_detalle.
   Estos modelos no existen en este microservicio.
-* La BD sí tiene FKs reales, pero los modelos NO deben mapearlos.
-* Las validaciones que cruzan servicios se hacen mediante llamadas API o simplemente confiando en IDs.
+- La BD sí tiene FKs reales, pero los modelos NO deben mapearlos.
+- Las validaciones que cruzan servicios se hacen mediante llamadas API o simplemente confiando en IDs.
 
 ---
 
-# 🧪 Colección Postman
+## 🧪 Colección Postman
 
 Se genera aparte, pero se incluye en:
 
 ```
 sale-service/postman/sale-service-collection.json
 ```
+
+---
+
+## 📝 Licencia
+
+Este proyecto forma parte del ecosistema Abyssium.
